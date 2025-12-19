@@ -7,7 +7,7 @@ local filter_combinator_item = {
 
     -- Icon with mipmaps (4 sizes in filter-combinator-icon.png)
     -- Standard Factorio icon sizes: 64, 32, 16, 8 (or 64, 48, 32, 16)
-    icon = "__filter-combinator__/graphics/filter-combinator-icon.png",
+    icon = "__lempi-filter-combinator__/graphics/filter-combinator-icon.png",
     icon_size = 64,
     icon_mipmaps = 4,
 

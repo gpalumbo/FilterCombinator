@@ -45,7 +45,7 @@ filter_combinator.sprites = make_4way_animation_from_spritesheet({
     layers = {
         {
             scale = 0.5,
-            filename = "__filter-combinator__/graphics/filter-combinator.png",
+            filename = "__lempi-filter-combinator__/graphics/filter-combinator.png",
             width = 156,
             height = 132,
             shift = util.by_pixel(0.5, 7.5)
@@ -107,7 +107,7 @@ local function make_display_sprite(x_offset, y_offset)
     return {
         north = util.draw_as_glow {
             scale = 0.5,
-            filename = "__filter-combinator__/graphics/combinator-displays.png",
+            filename = "__lempi-filter-combinator__/graphics/combinator-displays.png",
             x = x_offset,
             y = y_offset,
             width = 30,
@@ -116,7 +116,7 @@ local function make_display_sprite(x_offset, y_offset)
         },
         east = util.draw_as_glow {
             scale = 0.5,
-            filename = "__filter-combinator__/graphics/combinator-displays.png",
+            filename = "__lempi-filter-combinator__/graphics/combinator-displays.png",
             x = x_offset,
             y = y_offset,
             width = 30,
@@ -125,7 +125,7 @@ local function make_display_sprite(x_offset, y_offset)
         },
         south = util.draw_as_glow {
             scale = 0.5,
-            filename = "__filter-combinator__/graphics/combinator-displays.png",
+            filename = "__lempi-filter-combinator__/graphics/combinator-displays.png",
             x = x_offset,
             y = y_offset,
             width = 30,
@@ -134,7 +134,7 @@ local function make_display_sprite(x_offset, y_offset)
         },
         west = util.draw_as_glow {
             scale = 0.5,
-            filename = "__filter-combinator__/graphics/combinator-displays.png",
+            filename = "__lempi-filter-combinator__/graphics/combinator-displays.png",
             x = x_offset,
             y = y_offset,
             width = 30,

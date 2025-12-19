@@ -13,7 +13,7 @@ data:extend({
 
         -- Technology icon displayed in the research queue
         -- Using the filter combinator icon
-        icon = "__filter-combinator__/graphics/filter-combinator-icon.png",
+        icon = "__lempi-filter-combinator__/graphics/filter-combinator-icon.png",
         icon_size = 64,
 
         -- Technologies that must be researched before this one becomes available

@@ -168,6 +168,18 @@ function gui.create_gui(player, entity)
                                     {
                                         type = "label",
                                         caption = {"gui.filter-combinator-mode-intersection"}
+                                    },
+                                    -- Match quality checkbox
+                                    {
+                                        type = "checkbox",
+                                        name = "match_quality_checkbox",
+                                        state = match_quality,
+                                        caption = {"gui.filter-combinator-match-quality"},
+                                        tooltip = {"gui.filter-combinator-match-quality-tooltip"},
+                                        tags = {action = "match_quality_toggle"},
+                                        style_mods = {
+                                            left_margin = 30
+                                        }
                                     }
                                 }
                             },
@@ -185,25 +197,7 @@ function gui.create_gui(player, entity)
                                     top_margin = 4
                                 }
                             },
-                            -- Match quality checkbox
-                            {
-                                type = "flow",
-                                direction = "horizontal",
-                                style_mods = {
-                                    vertical_align = "center",
-                                    top_margin = 8
-                                },
-                                children = {
-                                    {
-                                        type = "checkbox",
-                                        name = "match_quality_checkbox",
-                                        state = match_quality,
-                                        caption = {"gui.filter-combinator-match-quality"},
-                                        tooltip = {"gui.filter-combinator-match-quality-tooltip"},
-                                        tags = {action = "match_quality_toggle"}
-                                    }
-                                }
-                            }
+
                         }
                     },
                     -- Signal grids section (only for real entities with connections)

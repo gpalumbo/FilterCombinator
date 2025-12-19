@@ -1,0 +1,9 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2025-11-24
+  Major Features:
+    - Initial release.
+    - Intersection mode will only output signals where the item is on both 
+      wires. Counts pass trough by color and are not combined or altered.
+    - Difference mode will only output signals where the item is not on both 
+      wires. Counts pass trough by color and are not combined or altered.

@@ -288,7 +288,9 @@ function logic.process_all_combinators()
         if entity and entity.valid then
             local mode = data.mode or fc_storage.ModeType.DIFF
             -- Get match_quality setting (default true), convert to ignore_quality
-            local match_quality = (data.match_quality ~= nil) and data.match_quality or true
+            -- NOTE: Can't use `x or default` pattern for booleans since `false or true` = true
+            local match_quality = data.match_quality
+            if match_quality == nil then match_quality = true end
             local ignore_quality = not match_quality
 
             -- Get filtered signals

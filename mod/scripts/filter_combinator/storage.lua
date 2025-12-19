@@ -283,9 +283,12 @@ function fc_storage.serialize_config(entity)
         }
     end
 
+    -- NOTE: Can't use `x or default` pattern for booleans since `false or default` = default
+    local mq = data.match_quality
+    if mq == nil then mq = DEFAULT_MATCH_QUALITY end
     return {
         mode = data.mode or DEFAULT_MODE,
-        match_quality = (data.match_quality ~= nil) and data.match_quality or DEFAULT_MATCH_QUALITY
+        match_quality = mq
     }
 end
 
@@ -325,8 +328,11 @@ function fc_storage.restore_config(entity, config)
     end
 
     -- Restore mode and match_quality
+    -- NOTE: Can't use `x or default` pattern for booleans since `false or default` = default
     data.mode = config.mode or DEFAULT_MODE
-    data.match_quality = (config.match_quality ~= nil) and config.match_quality or DEFAULT_MATCH_QUALITY
+    local mq = config.match_quality
+    if mq == nil then mq = DEFAULT_MATCH_QUALITY end
+    data.match_quality = mq
 
     -- Sync display sprite to match restored mode
     fc_storage.sync_display_to_mode(entity)
