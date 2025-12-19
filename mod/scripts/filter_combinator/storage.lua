@@ -318,6 +318,9 @@ function fc_storage.restore_config(entity, config)
 
     -- Restore mode
     data.mode = config.mode or DEFAULT_MODE
+
+    -- Sync display sprite to match restored mode
+    fc_storage.sync_display_to_mode(entity)
 end
 
 --------------------------------------------------------------------------------
@@ -394,7 +397,34 @@ function fc_storage.get_mode(entity)
     return DEFAULT_MODE
 end
 
+--- Sync the entity's display sprite to match its current mode
+--- Updates the arithmetic combinator operation to show the correct symbol:
+---   minus_symbol_sprites = difference mode
+---   multiply_symbol_sprites = intersection mode
+--- Call this after any operation that might change mode or create/restore an entity
+--- @param entity LuaEntity The entity to sync (must be valid, non-ghost)
+function fc_storage.sync_display_to_mode(entity)
+    if not entity or not entity.valid then
+        return
+    end
+
+    -- Ghosts don't have control behaviors - skip them
+    if entity_lib.is_ghost(entity) then
+        return
+    end
+
+    local mode = fc_storage.get_mode(entity)
+    local control = entity.get_or_create_control_behavior()
+    if control then
+        local params = control.parameters or {}
+        -- Use "-" for difference mode, "*" for intersection mode
+        params.operation = (mode == ModeType.INTER) and "*" or "-"
+        control.parameters = params
+    end
+end
+
 --- Set the mode for an entity (universal - ghost/real)
+--- Also syncs the display sprite for real entities
 --- @param entity LuaEntity The entity
 --- @param mode string 'diff' or 'inter'
 function fc_storage.set_mode(entity, mode)
@@ -402,6 +432,9 @@ function fc_storage.set_mode(entity, mode)
         mode = DEFAULT_MODE
     end
     fc_storage.update_data(entity, {mode = mode})
+
+    -- Sync display for real entities
+    fc_storage.sync_display_to_mode(entity)
 end
 
 --------------------------------------------------------------------------------
@@ -409,7 +442,7 @@ end
 --------------------------------------------------------------------------------
 
 --- Validate and clean up invalid entities from storage
---- Also destroys any orphaned output combinators
+--- Also destroys any orphaned output combinators and syncs display sprites
 --- Should be called periodically or on load to ensure storage integrity
 function fc_storage.validate_and_cleanup()
     if not storage.filter_combinators then
@@ -419,6 +452,7 @@ function fc_storage.validate_and_cleanup()
     local invalid_units = {}
 
     -- Find invalid entities and collect their output combinators
+    -- Also sync display sprites for valid entities (migration/load fix)
     for unit_number, data in pairs(storage.filter_combinators) do
         if not data.entity or not data.entity.valid then
             table.insert(invalid_units, unit_number)
@@ -429,6 +463,9 @@ function fc_storage.validate_and_cleanup()
             if data.output_green and data.output_green.valid then
                 data.output_green.destroy({raise_destroy = false})
             end
+        else
+            -- Valid entity - ensure display sprite matches mode
+            fc_storage.sync_display_to_mode(data.entity)
         end
     end
 

@@ -141,14 +141,12 @@ local function write_signals_to_combinator(output_combinator, signals)
     -- Write each signal to a slot
     for _, signal_data in ipairs(signals) do
         if signal_data.signal and signal_data.count then
-            -- LogisticFilter format for Factorio 2.0:
-            -- value: the signal ID (ComparatorValueID)
-            -- min: the count value
-            local filter = {
+            -- Factorio 2.0 requires quality field on SignalID
+            signal_data.signal.quality = signal_data.signal.quality or "normal"
+            section.set_slot(slot_index, {
                 value = signal_data.signal,
                 min = signal_data.count
-            }
-            section.set_slot(slot_index, filter)
+            })
             slot_index = slot_index + 1
         end
     end

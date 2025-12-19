@@ -46,16 +46,16 @@ filter_combinator.sprites = make_4way_animation_from_spritesheet({
         {
             scale = 0.5,
             filename = "__filter-combinator__/graphics/filter-combinator.png",
-            width = 144,
-            height = 124,
+            width = 156,
+            height = 132,
             shift = util.by_pixel(0.5, 7.5)
         },
         {
             scale = 0.5,
-            filename = "__base__/graphics/entity/combinator/arithmetic-combinator-shadow.png",
-            width = 148,
-            height = 156,
-            shift = util.by_pixel(13.5, 24.5),
+            filename = "__base__/graphics/entity/combinator/decider-combinator-shadow.png",
+            width = 156,
+            height = 158,
+            shift = util.by_pixel(12, 24),
             draw_as_shadow = true
         }
     }
@@ -65,31 +65,31 @@ filter_combinator.sprites = make_4way_animation_from_spritesheet({
 filter_combinator.activity_led_sprites = {
     north = util.draw_as_glow {
         scale = 0.5,
-        filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-N.png",
+        filename = "__base__/graphics/entity/combinator/activity-leds/decider-combinator-LED-N.png",
         width = 16,
         height = 14,
-        shift = util.by_pixel(8.5, -12.5)
+        shift = util.by_pixel(8.5, -13)
     },
     east = util.draw_as_glow {
         scale = 0.5,
-        filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-E.png",
-        width = 14,
-        height = 14,
-        shift = util.by_pixel(16.5, -1)
+        filename = "__base__/graphics/entity/combinator/activity-leds/decider-combinator-LED-E.png",
+        width = 16,
+        height = 16,
+        shift = util.by_pixel(16, -4)
     },
     south = util.draw_as_glow {
         scale = 0.5,
-        filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-S.png",
+        filename = "__base__/graphics/entity/combinator/activity-leds/decider-combinator-LED-S.png",
         width = 16,
-        height = 16,
-        shift = util.by_pixel(-8, 7.5)
+        height = 14,
+        shift = util.by_pixel(-8, 4.5)
     },
     west = util.draw_as_glow {
         scale = 0.5,
-        filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-W.png",
-        width = 14,
-        height = 14,
-        shift = util.by_pixel(-16, -12.5)
+        filename = "__base__/graphics/entity/combinator/activity-leds/decider-combinator-LED-W.png",
+        width = 16,
+        height = 16,
+        shift = util.by_pixel(-15, -18.5)
     }
 }
 
@@ -121,7 +121,7 @@ local function make_display_sprite(x_offset, y_offset)
             y = y_offset,
             width = 30,
             height = 22,
-            shift = util.by_pixel(0, -10.5)
+            shift = util.by_pixel(0, -13.5)
         },
         south = util.draw_as_glow {
             scale = 0.5,
@@ -139,7 +139,7 @@ local function make_display_sprite(x_offset, y_offset)
             y = y_offset,
             width = 30,
             height = 22,
-            shift = util.by_pixel(0, -10.5)
+            shift = util.by_pixel(0, -13.5)
         }
     }
 end
@@ -148,8 +148,8 @@ end
 -- We'll use these to show the current mode on the display
 -- Index 0 = blank, 1 = intersection, 2 = difference
 filter_combinator.plus_symbol_sprites = make_display_sprite(0)    -- blank (default/idle)
-filter_combinator.minus_symbol_sprites = make_display_sprite(60)  -- difference symbol
-filter_combinator.multiply_symbol_sprites = make_display_sprite(30)  -- intersection symbol
+filter_combinator.minus_symbol_sprites = make_display_sprite(60, 0)  -- difference symbol
+filter_combinator.multiply_symbol_sprites = make_display_sprite(30, 0)  -- intersection symbol
 filter_combinator.divide_symbol_sprites = make_display_sprite(0)  -- unused
 filter_combinator.modulo_symbol_sprites = make_display_sprite(0)  -- unused
 filter_combinator.power_symbol_sprites = make_display_sprite(0)   -- unused

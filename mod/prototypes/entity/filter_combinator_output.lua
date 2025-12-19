@@ -16,18 +16,9 @@ output_combinator.icon_size = 64
 
 -- Make it hidden (not selectable, not minable, not shown in menus)
 -- Add get-by-unit-number flag so it can be retrieved from other contexts
-output_combinator.flags = {
-    "not-on-map",
-    "placeable-off-grid",
-    "not-blueprintable",
-    "not-deconstructable",
-    "get-by-unit-number",
-    "hidden"
-}
+output_combinator.flags = {"not-on-map", "placeable-off-grid", "not-blueprintable", "not-deconstructable", "get-by-unit-number"}
 output_combinator.selectable_in_game = false
 output_combinator.minable = nil
-output_combinator.hidden = true
-output_combinator.hidden_in_factoriopedia = true
 
 -- No collision (shares space with filter combinator)
 output_combinator.collision_box = {{0, 0}, {0, 0}}
@@ -67,14 +58,6 @@ output_combinator.sprites = {
         shift = {0, 0}
     }
 }
-
--- No activity LED (invisible)
-output_combinator.activity_led_sprites = nil
-output_combinator.activity_led_light = nil
-output_combinator.activity_led_light_offsets = {{0, 0}, {0, 0}, {0, 0}, {0, 0}}
-
--- No wire connection points visible (use minimal definition)
-output_combinator.circuit_wire_connection_points = nil
 
 -- Extend data
 data:extend({output_combinator})

@@ -133,7 +133,11 @@ function control.on_built(entity, player, tags)
 
     -- Restore config from blueprint tags if present
     if tags and tags.filter_combinator_config then
+        -- restore_config calls sync_display_to_mode internally
         fc_storage.restore_config(entity, tags.filter_combinator_config)
+    else
+        -- Fresh build without tags - sync display to default mode
+        fc_storage.sync_display_to_mode(entity)
     end
 end
 
