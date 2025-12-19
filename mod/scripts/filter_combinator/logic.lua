@@ -10,6 +10,7 @@
 
 local circuit_utils = require("lib.circuit_utils")
 local entity_lib = require("lib.entity_lib")
+local signal_utils = require("lib.signal_utils")
 local fc_storage = require("scripts.filter_combinator.storage")
 
 local logic = {}
@@ -18,19 +19,18 @@ local logic = {}
 -- Signal ID Set Operations
 --------------------------------------------------------------------------------
 
---- Build a set of signal IDs from a signals array
+--- Build a set of signal IDs from a signals array (boolean presence only)
 --- @param signals table Array of {signal = SignalID, count = number}
---- @return table Set of signal keys for fast lookup
-local function build_signal_id_set(signals)
+--- @param ignore_quality boolean Whether to ignore quality when building keys
+--- @return table Set of signal keys {key = true} for fast lookup
+local function build_signal_id_set(signals, ignore_quality)
     local id_set = {}
     if not signals then return id_set end
 
     for _, signal_data in ipairs(signals) do
         if signal_data.signal then
-            -- Create unique key from type:name
-            local key = (signal_data.signal.type or "item") .. ":" .. signal_data.signal.name
-            -- Store the full signal_data (not just `true`) so callers can access count/metadata
-            id_set[key] = signal_data
+            local key = signal_utils.get_signal_key(signal_data.signal, ignore_quality)
+            id_set[key] = true
         end
     end
 
@@ -40,12 +40,12 @@ end
 --- Check if a signal ID is in a set
 --- @param signal SignalID The signal to check
 --- @param id_set table Set of signal keys
+--- @param ignore_quality boolean Whether to ignore quality when checking
 --- @return boolean True if signal is in set
-local function signal_in_set(signal, id_set)
+local function signal_in_set(signal, id_set, ignore_quality)
     if not signal or not id_set then return false end
-    local key = (signal.type or "item") .. ":" .. signal.name
-    -- check presence (non-nil)
-    return id_set[key] ~= nil
+    local key = signal_utils.get_signal_key(signal, ignore_quality)
+    return id_set[key] == true
 end
 
 --------------------------------------------------------------------------------
@@ -55,18 +55,19 @@ end
 --- Compute difference: signals unique to source (not in other)
 --- @param source_signals table Array of {signal = SignalID, count = number}
 --- @param other_signals table Array of {signal = SignalID, count = number}
+--- @param ignore_quality boolean Whether to ignore quality when comparing
 --- @return table Array of signals from source that are NOT in other
-local function compute_difference(source_signals, other_signals)
+local function compute_difference(source_signals, other_signals, ignore_quality)
     local result = {}
 
     if not source_signals then return result end
 
     -- Build set of signal IDs from the other wire
-    local other_ids = build_signal_id_set(other_signals)
+    local other_ids = build_signal_id_set(other_signals, ignore_quality)
 
     -- Filter source signals: keep only those NOT in other
     for _, signal_data in ipairs(source_signals) do
-        if signal_data.signal and not signal_in_set(signal_data.signal, other_ids) then
+        if signal_data.signal and not signal_in_set(signal_data.signal, other_ids, ignore_quality) then
             table.insert(result, signal_data)
         end
     end
@@ -75,12 +76,14 @@ local function compute_difference(source_signals, other_signals)
 end
 
 
---- Compute intersection for both wires in a single pass
+--- Compute intersection for both wires
+--- When ignore_quality=true, uses two passes to find all matching green signals
 --- @param red_signals table Array of {signal = SignalID, count = number}
 --- @param green_signals table Array of {signal = SignalID, count = number}
+--- @param ignore_quality boolean Whether to ignore quality when comparing
 --- @return table red_out Array of signals from red that are also in green (with red counts)
 --- @return table green_out Array of signals from green that are also in red (with green counts)
-local function compute_intersection(red_signals, green_signals)
+local function compute_intersection(red_signals, green_signals, ignore_quality)
     local red_result = {}
     local green_result = {}
 
@@ -88,18 +91,35 @@ local function compute_intersection(red_signals, green_signals)
         return red_result, green_result
     end
 
-    -- Build set of green signal IDs mapping to their signal_data
-    local green_ids = build_signal_id_set(green_signals)
+    -- Build boolean set of green signal keys for fast lookup
+    local green_ids = build_signal_id_set(green_signals, ignore_quality)
 
-    -- Iterate red signals once; when a match is found add to both outputs
+    -- Track which green signals we've already added (to avoid duplicates)
+    -- Key is the full signal key (with quality) to ensure uniqueness
+    local added_green = {}
+
+    -- Pass 1: Find red signals that match green, add them to red_result
     for _, r in ipairs(red_signals) do
         if r.signal then
-            local key = (r.signal.type or "item") .. ":" .. r.signal.name
-            local g = green_ids[key]
-            if g then
-                -- Insert original signal_data objects directly to avoid extra allocations
+            if signal_in_set(r.signal, green_ids, ignore_quality) then
                 table.insert(red_result, r)
-                table.insert(green_result, g)
+            end
+        end
+    end
+
+    -- Pass 2: Find green signals that match red, add them to green_result
+    -- Build red set for lookup
+    local red_ids = build_signal_id_set(red_signals, ignore_quality)
+
+    for _, g in ipairs(green_signals) do
+        if g.signal then
+            if signal_in_set(g.signal, red_ids, ignore_quality) then
+                -- Use full key (with quality) to track uniqueness
+                local full_key = signal_utils.get_signal_key(g.signal, false)
+                if not added_green[full_key] then
+                    table.insert(green_result, g)
+                    added_green[full_key] = true
+                end
             end
         end
     end
@@ -191,8 +211,9 @@ end
 --- Returns empty outputs if entity has no power
 --- @param entity LuaEntity The combinator entity
 --- @param mode string 'diff' for difference, 'inter' for intersection
+--- @param ignore_quality boolean Whether to ignore quality when comparing signals
 --- @return table {red_out = signals, green_out = signals} or nil if invalid
-function logic.process_filter(entity, mode)
+function logic.process_filter(entity, mode, ignore_quality)
     if not entity or not entity.valid then
         return nil
     end
@@ -214,14 +235,14 @@ function logic.process_filter(entity, mode)
     local green_out = {}
 
     if mode == fc_storage.ModeType.INTER then
-        -- Intersection mode: compute both red and green outputs in one pass
-        red_out, green_out = compute_intersection(red_in, green_in)
+        -- Intersection mode: signals present on both wires
+        red_out, green_out = compute_intersection(red_in, green_in, ignore_quality)
     else
         -- Difference mode (default): signals unique to each wire
         -- Red out: red signals whose IDs are NOT on green
         -- Green out: green signals whose IDs are NOT on red
-        red_out = compute_difference(red_in, green_in)
-        green_out = compute_difference(green_in, red_in)
+        red_out = compute_difference(red_in, green_in, ignore_quality)
+        green_out = compute_difference(green_in, red_in, ignore_quality)
     end
 
     return {
@@ -239,7 +260,9 @@ function logic.get_output_signals(entity)
     end
 
     local mode = fc_storage.get_mode(entity)
-    local result = logic.process_filter(entity, mode)
+    local match_quality = fc_storage.get_match_quality(entity)
+    local ignore_quality = not match_quality
+    local result = logic.process_filter(entity, mode, ignore_quality)
 
     if result then
         return {
@@ -264,9 +287,12 @@ function logic.process_all_combinators()
 
         if entity and entity.valid then
             local mode = data.mode or fc_storage.ModeType.DIFF
+            -- Get match_quality setting (default true), convert to ignore_quality
+            local match_quality = (data.match_quality ~= nil) and data.match_quality or true
+            local ignore_quality = not match_quality
 
             -- Get filtered signals
-            local result = logic.process_filter(entity, mode)
+            local result = logic.process_filter(entity, mode, ignore_quality)
 
             if result then
                 -- Get hidden output combinators

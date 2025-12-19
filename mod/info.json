@@ -1,9 +1,9 @@
 {
-  "name": "filter-combinator",
+  "name": "lem-filter-combinator-set",
   "version": "0.1.0",
-  "title": "Filter Combinator",
+  "title": "Filter Combinator (SymDiff)",
   "author": "Gordon Palumbo",
   "factorio_version": "2.0",
   "dependencies": ["base >= 2.0.0", "flib >= 0.16.0"],
-  "description": "A combinator that filters signals between red and green wires, outputting either the intersection or symmetric difference."
+  "description": "A combinator that filters signals between red and green wires, outputting either the intersection or symmetric difference (exclusive signals of each wire). Item counts pass through by color and not affected."
 }

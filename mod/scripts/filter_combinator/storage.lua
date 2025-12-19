@@ -7,6 +7,7 @@
 --     [unit_number] = {
 --         entity = entity_reference,
 --         mode = 'diff' | 'inter',  -- Default: 'diff'
+--         match_quality = boolean,  -- Default: true (match quality when filtering)
 --         output_red = entity_reference,   -- Hidden constant combinator for red output
 --         output_green = entity_reference  -- Hidden constant combinator for green output
 --     }
@@ -15,7 +16,8 @@
 -- Ghost Tags Structure:
 -- {
 --     filter_combinator_config = {
---         mode = 'diff' | 'inter'
+--         mode = 'diff' | 'inter',
+--         match_quality = boolean
 --     }
 -- }
 
@@ -35,6 +37,9 @@ fc_storage.ModeType = ModeType
 
 -- Default mode
 local DEFAULT_MODE = ModeType.DIFF
+
+-- Default match quality setting (true = match quality when filtering)
+local DEFAULT_MATCH_QUALITY = true
 
 --------------------------------------------------------------------------------
 -- Storage Initialization
@@ -84,6 +89,7 @@ function fc_storage.register(entity, output_red, output_green)
     local data = {
         entity = entity,
         mode = DEFAULT_MODE,
+        match_quality = DEFAULT_MATCH_QUALITY,
         output_red = output_red,
         output_green = output_green
     }
@@ -272,12 +278,14 @@ function fc_storage.serialize_config(entity)
     if not data then
         -- Return default config
         return {
-            mode = DEFAULT_MODE
+            mode = DEFAULT_MODE,
+            match_quality = DEFAULT_MATCH_QUALITY
         }
     end
 
     return {
-        mode = data.mode or DEFAULT_MODE
+        mode = data.mode or DEFAULT_MODE,
+        match_quality = (data.match_quality ~= nil) and data.match_quality or DEFAULT_MATCH_QUALITY
     }
 end
 
@@ -316,8 +324,9 @@ function fc_storage.restore_config(entity, config)
         return
     end
 
-    -- Restore mode
+    -- Restore mode and match_quality
     data.mode = config.mode or DEFAULT_MODE
+    data.match_quality = (config.match_quality ~= nil) and config.match_quality or DEFAULT_MATCH_QUALITY
 
     -- Sync display sprite to match restored mode
     fc_storage.sync_display_to_mode(entity)
@@ -348,7 +357,8 @@ function fc_storage.get_ghost_config(ghost_entity)
     if not tags or not tags.filter_combinator_config then
         -- Return default config
         return {
-            mode = DEFAULT_MODE
+            mode = DEFAULT_MODE,
+            match_quality = DEFAULT_MATCH_QUALITY
         }
     end
 
@@ -375,6 +385,9 @@ function fc_storage.save_ghost_config(ghost_entity, config)
     -- Ensure config has required fields
     config = config or {}
     config.mode = config.mode or DEFAULT_MODE
+    if config.match_quality == nil then
+        config.match_quality = DEFAULT_MATCH_QUALITY
+    end
 
     -- Use complete table replacement pattern for ghost tags
     local new_tags = ghost_entity.tags or {}
@@ -435,6 +448,27 @@ function fc_storage.set_mode(entity, mode)
 
     -- Sync display for real entities
     fc_storage.sync_display_to_mode(entity)
+end
+
+--- Get the match_quality setting for an entity (universal - ghost/real)
+--- @param entity LuaEntity The entity
+--- @return boolean true if quality should be matched, false otherwise
+function fc_storage.get_match_quality(entity)
+    local data = fc_storage.get_data(entity)
+    if data and data.match_quality ~= nil then
+        return data.match_quality
+    end
+    return DEFAULT_MATCH_QUALITY
+end
+
+--- Set the match_quality setting for an entity (universal - ghost/real)
+--- @param entity LuaEntity The entity
+--- @param match_quality boolean true to match quality, false to ignore quality
+function fc_storage.set_match_quality(entity, match_quality)
+    if match_quality == nil then
+        match_quality = DEFAULT_MATCH_QUALITY
+    end
+    fc_storage.update_data(entity, {match_quality = match_quality})
 end
 
 --------------------------------------------------------------------------------

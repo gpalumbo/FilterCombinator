@@ -41,9 +41,10 @@ function gui.create_gui(player, entity)
 
     local is_ghost = entity_lib.is_ghost(entity)
 
-    -- Get current mode
+    -- Get current mode and match_quality setting
     local current_mode = fc_storage.get_mode(entity)
     local is_intersection = (current_mode == fc_storage.ModeType.INTER)
+    local match_quality = fc_storage.get_match_quality(entity)
 
     -- Get power status for real entities
     local power_status = {sprite = "utility/bar_gray_pip", text = "Ghost"}
@@ -182,6 +183,25 @@ function gui.create_gui(player, entity)
                                     single_line = false,
                                     maximal_width = 300,
                                     top_margin = 4
+                                }
+                            },
+                            -- Match quality checkbox
+                            {
+                                type = "flow",
+                                direction = "horizontal",
+                                style_mods = {
+                                    vertical_align = "center",
+                                    top_margin = 8
+                                },
+                                children = {
+                                    {
+                                        type = "checkbox",
+                                        name = "match_quality_checkbox",
+                                        state = match_quality,
+                                        caption = {"gui.filter-combinator-match-quality"},
+                                        tooltip = {"gui.filter-combinator-match-quality-tooltip"},
+                                        tags = {action = "match_quality_toggle"}
+                                    }
                                 }
                             }
                         }
@@ -428,6 +448,36 @@ function gui.on_gui_switch_state_changed(event)
     fc_storage.set_mode(entity, new_mode)
 
     -- Recreate GUI to reflect changes
+    gui.create_gui(player, entity)
+end
+
+--- Handle checkbox state changed events
+--- @param event EventData.on_gui_checked_state_changed
+function gui.on_gui_checked_state_changed(event)
+    local element = event.element
+    if not element or not element.valid then return end
+
+    local tags = element.tags
+    if not tags or tags.action ~= "match_quality_toggle" then return end
+
+    local player = game.get_player(event.player_index)
+    if not player then return end
+
+    -- Find the GUI frame
+    local frame = player.gui.screen[GUI_FRAME_NAME]
+    if not frame or not frame.valid then return end
+
+    -- Get entity
+    local entity = get_entity_from_gui(frame)
+    if not entity or not entity.valid then
+        gui.close_gui(player)
+        return
+    end
+
+    -- Update match_quality setting
+    fc_storage.set_match_quality(entity, element.state)
+
+    -- Recreate GUI to reflect changes in output signals
     gui.create_gui(player, entity)
 end
 

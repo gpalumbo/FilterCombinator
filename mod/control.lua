@@ -128,6 +128,11 @@ script.on_event(defines.events.on_gui_switch_state_changed, function(event)
     fc_gui.on_gui_switch_state_changed(event)
 end)
 
+-- Handle checkbox state changes (for match quality toggle)
+script.on_event(defines.events.on_gui_checked_state_changed, function(event)
+    fc_gui.on_gui_checked_state_changed(event)
+end)
+
 -----------------------------------------------------------
 -- BLUEPRINT/COPY-PASTE ROUTING
 -----------------------------------------------------------
