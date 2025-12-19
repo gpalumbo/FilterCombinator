@@ -138,16 +138,10 @@ end)
 -----------------------------------------------------------
 
 script.on_event(defines.events.on_player_setup_blueprint, function(event)
-    local player = game.get_player(event.player_index)
-    if not player or not player.valid then return end
-
-    -- Get the blueprint item stack
-    local bp = player.blueprint_to_setup
-    if not bp or not bp.valid_for_read then
-        bp = player.cursor_stack
-    end
-
-    if not bp or not bp.valid_for_read then return end
+    -- Use event.record (for blueprint library) or event.stack (for item stacks)
+    -- This handles both new blueprints and reselected blueprint contents correctly
+    local bp = event.record or event.stack
+    if not bp then return end
 
     -- Get the entity mapping from the event
     local mapping = event.mapping
