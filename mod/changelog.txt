@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: 2026-01-03
+  Bug Fixes:
+    - On reselecting blueprint, error was cause by using old api.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.0
 Date: 2025-11-24
   Major Features:
@@ -6,4 +11,4 @@ Date: 2025-11-24
     - Intersection mode will only output signals where the item is on both 
       wires. Counts pass trough by color and are not combined or altered.
     - Difference mode will only output signals where the item is not on both 
-      wires. Counts pass trough by color and are not combined or altered.
+      wires. Counts pass through by color and are not combined or altered.

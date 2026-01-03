@@ -223,10 +223,11 @@ function control.on_entity_cloned(source, destination)
 end
 
 --- Handle blueprint setup - serialize config to tags
---- @param blueprint LuaItemStack The blueprint being set up
+--- @param blueprint LuaItemStack|LuaRecord The blueprint being set up
 --- @param mapping table Blueprint index to real entity mapping
 function control.on_player_setup_blueprint(blueprint, mapping)
-    if not blueprint or not blueprint.valid_for_read then return end
+    -- Factorio 2.0: Use .valid instead of .valid_for_read (works for both LuaItemStack and LuaRecord)
+    if not blueprint or not blueprint.valid then return end
     if not mapping then return end
 
     for blueprint_index, real_entity in pairs(mapping) do
