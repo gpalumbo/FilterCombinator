@@ -22,8 +22,8 @@ local filter_combinator_recipe = {
     -- Crafting time (slightly longer than basic combinators due to advanced circuits)
     energy_required = 1,
 
-    -- Category
-    category = "crafting"
+    -- Category (2.0 API: use `categories` table instead of `category`/`additional_categories`)
+    categories = {"crafting"}
 }
 
 data:extend({filter_combinator_recipe})
